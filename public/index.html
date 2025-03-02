@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Donation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            max-width: 400px;
+            margin: auto;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">Donate</h2>
+    <form id="donation-form">
+        <label>User Unique ID:</label>
+        <input type="text" id="user_unique_id" required>
+        
+        <label>Name:</label>
+        <input type="text" id="name" required>
+        
+        <label>Phone Number:</label>
+        <input type="text" id="number" required>
+        
+        <label>Email:</label>
+        <input type="email" id="email" required>
+        
+        <label>Category:</label>
+        <input type="text" id="category" required>
+        
+        <label>Amount ($):</label>
+        <input type="number" id="amount" required min="1">
+        
+        <label>Payment Method:</label>
+        <select id="paymentMethod" required>
+            <option value="card">Card</option>
+            <option value="klarna">Klarna</option>
+            <option value="link">Link</option>
+            <option value="cashapp">CashApp</option>
+            <option value="amazon_pay">Amazon Pay</option>
+            <option value="paypal">PayPal</option>
+            <option value="google_pay">Google Pay</option>
+            <option value="apple_pay">Apple Pay</option>
+            <option value="afterpay">Afterpay</option>
+        </select>
+        
+        <button type="submit">Donate</button>
+    </form>
+
+    <script>
+        document.getElementById("donation-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const formData = {
+                user_unique_id: document.getElementById("user_unique_id").value,
+                name: document.getElementById("name").value,
+                number: document.getElementById("number").value,
+                email: document.getElementById("email").value,
+                category: document.getElementById("category").value,
+                amount: parseFloat(document.getElementById("amount").value), // Convert amount to a number
+                paymentMethod: document.getElementById("paymentMethod").value
+            };
+
+            try {
+                const response = await fetch("http://localhost:5000/api/payments/create-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (response.ok && data.checkoutUrl) {
+                    window.location.href = data.checkoutUrl;
+                } else {
+                    alert(data.error || "Error creating payment session");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to process payment. Please try again.");
+            }
+        });
+    </script>
+
+</body>
+</html>

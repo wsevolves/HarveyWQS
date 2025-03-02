@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful</title>
+</head>
+<body>
+  <h1>Payment Successful!</h1>
+  <p>Thank you for your donation.</p>
+
+  <script>
+    // Extract session_id from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id");
+
+    if (sessionId) {
+      // Send the session_id to the server to confirm payment and save donor details
+      fetch("http://localhost:5000/api/payments/confirm-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ session_id: sessionId }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("✅ Donor Details Saved:", data);
+        })
+        .catch((error) => {
+          console.error("❌ Error Saving Donor Details:", error);
+        });
+    } else {
+      console.error("❌ Session ID not found in URL");
+    }
+  </script>
+</body>
+</html>
